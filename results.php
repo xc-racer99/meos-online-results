@@ -1,20 +1,38 @@
 <?php
+include_once('data.php');
+
 if (isset($_POST['submit'])) {
 
 if (empty($_FILES['fileToUpload']['name'])) {
 	die('No GPX provided');
 }
 
+if (empty($_POST['course'])) {
+	print_r($_POST);
+	die('No course selected');
+}
+
 if (empty($_POST['name'])) {
 	die('No name set');
 }
 
-include_once('data.php');
+$selCourse = 0;
+
+/* Find course (name, id file) */
+foreach ($courses as $course) {
+	if ($_POST['course'] == $course[1]) {
+		$selCourse = $course;
+	}
+}
+
+if ($selCourse === 0) {
+	die('Invalid course selected');
+}
 
 $controls = array();
 $name = $_POST['name'];
 
-$courseXml = simplexml_load_file($courseFile) or die('Failed to load course');
+$courseXml = simplexml_load_file($selCourse[2]) or die('Failed to load course');
 
 //print_r($courseXml);
 
@@ -29,7 +47,7 @@ foreach ($trkseg->trkpt as $pt) {
 
 //print_r($controls);
 
-$target_dir = "uploads/";
+$target_dir = "uploads/" . "$selCourse[1]/";
 $target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
 $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
 $target_file = $target_dir . $name . '.gpx';
@@ -114,7 +132,7 @@ $cmp->addAttribute('id', $str);
 $base = $cmp->addChild('base');
 $base[0] = $name;
 $base->addAttribute('org', '1');
-$base->addAttribute('cls', '1');
+$base->addAttribute('cls', $selCourse[1]);
 
 if ($ok) {
 	$base->addAttribute('stat', '1');
@@ -166,7 +184,7 @@ $radio[0] = $radios;
 <!DOCTYPE html>
 <html>
 <body>
-<p>Uploaded, please check out <a href="https://results.sageorienteering.ca">https://results.sageorienteering.ca</a></p>
+<p>Uploaded, please check out <a href="https://results.sageorienteering.ca/?cmp=<?php echo $cmp; ?>">https://results.sageorienteering.ca</a></p>
 </body>
 </html>
 
@@ -179,6 +197,9 @@ include_once("data.php");
 ?>
 <!DOCTYPE html>
 <html>
+<head>
+<link href="/style.css" rel="stylesheet" type="text/css" />
+</head>
 <body>
 <h1><?php echo $name;?> Results Upload</h1>
 <form action="results.php" method="post" enctype="multipart/form-data">
@@ -186,6 +207,14 @@ include_once("data.php");
     <input type="text" name="name" id="name">
     <label for="fileToUpload">Select GPX to upload: </label>
     <input type="file" name="fileToUpload" id="fileToUpload">
+    <label for="course">Choose course</label>
+    <select id="course" name="course">
+<?php
+foreach ($courses as $course) {
+	echo '<option value="' . $course[1] . '">' . $course[0] . "</option>";
+}
+?>
+    </select>
     <input type="submit" value="Upload GPX" name="submit">
 </form>
 
