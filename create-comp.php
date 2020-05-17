@@ -9,7 +9,9 @@ $xml = new SimpleXMLElement('<MOPComplete xmlns="http://www.melin.nu/mop"><org i
 $comp = $xml->addChild('competition');
 $comp->addAttribute('date', $date);
 $comp->addAttribute('organizer', 'Sage');
-$comp->addAttribute('homepage', 'https://sage.whyjustrun.ca');
+if (!empty($homepage)) {
+	$comp->addAttribute('homepage', $homepage);
+}
 $comp[0] = $name;
 
 /* Courses format is name, id, file */
