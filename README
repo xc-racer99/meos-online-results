@@ -1,0 +1,11 @@
+This is a basic orienteering course and uploaded track parsing written in PHP.  It is designed so that participants can do a course whenever, upload their track, and get splits for when they were at controls.  GPX tracks are also saved so that they can be loaded in RouteGadget, 3D Rerun, etc
+
+Usage
+
+Install
+
+This is designed to be clone to a new subfolder within the MeOS live results main folder (see MeOS Online Protocol at http://www.melin.nu/meos/en/codes.php).  Another version of the PHP files is at https://github.com/xc-racer99/meos_live_results
+
+Modifying For An Event
+
+Upload the tracks for each course to the cloned copy of this repository and edit data.php as needed.
