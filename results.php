@@ -3,6 +3,14 @@
 <head>
 <link href="/style.css" rel="stylesheet" type="text/css" />
 <?php
+
+function retry($error) {
+echo "<p>" . $error . "</p>";
+echo '<button onClick="window.location.href=window.location.href">Retry</button>';
+echo "</body></html>";
+exit();
+}
+
 include_once('data.php');
 
 echo "<title>" . $name . "</title>";
@@ -12,22 +20,22 @@ echo "<title>" . $name . "</title>";
 .input-group input { margin-bottom: 5px; display: inline-block; }
 </style>
 </head>
-
+<body>
 <?php
 
 if (isset($_POST['submit'])) {
 
 if (empty($_FILES['fileToUpload']['name'])) {
-	die('No GPX provided');
+	retry('No GPX provided');
 }
 
 if (empty($_POST['course'])) {
 	print_r($_POST);
-	die('No course selected');
+	retry('No course selected');
 }
 
 if (empty($_POST['name'])) {
-	die('No name set');
+	retry('No name set');
 }
 
 $selCourse = 0;
@@ -40,19 +48,19 @@ foreach ($courses as $course) {
 }
 
 if ($selCourse === 0) {
-	die('Invalid course selected');
+	retry('Invalid course selected');
 }
 
 $controls = array();
 $name = $_POST['name'];
 
-$courseXml = simplexml_load_file($selCourse[2]) or die('Failed to load course');
+$courseXml = simplexml_load_file($selCourse[2]) or retry('Failed to load course');
 
 //print_r($courseXml);
 
 $trkseg = $courseXml->trk[0]->trkseg[0];
 if (!$trkseg) {
-	die('Failed to parse course - contact website@skilarchhills.ca');
+	retry('Failed to parse course - contact website@skilarchhills.ca');
 }
 
 foreach ($trkseg->trkpt as $pt) {
@@ -68,35 +76,35 @@ $target_file = $target_dir . $name . '.gpx';
 
 // Check if file already exists
 if (file_exists($target_file)) {
-    die("Sorry, file already exists - try a different name.");
+    retry("Sorry, file already exists - try a different name.");
 }
 
 // Check file size (5MB)
 if ($_FILES["fileToUpload"]["size"] > 5000000) {
-    die("Sorry, your file is too large.");
+    retry("Sorry, your file is too large.");
 }
 
 // Allow certain file formats
 if($imageFileType != "gpx") {
-    die("Sorry, only GPX files are allowed.");
+    retry("Sorry, only GPX files are allowed.");
 }
 if (!move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
-    die("Sorry, there was an error uploading your file.");
+    retry("Sorry, there was an error uploading your file.");
 }
 
-$gpx = simplexml_load_file($target_file) or die("Failed to load uploaded GPX");
+$gpx = simplexml_load_file($target_file) or retry("Failed to load uploaded GPX");
 
 //var_dump($gpx);
 
 $trkseg = $gpx->trk[0]->trkseg[0];
 if (!$trkseg) {
-    die("Failed to parse uploaded GPX - part 1");
+    retry("Failed to parse uploaded GPX - part 1");
 }
 if (!$trkseg->trkpt[0]) {
-    die("Failed to parse uploaded GPX - part 2");
+    retry("Failed to parse uploaded GPX - part 2");
 }
 if (!$trkseg->trkpt[0]->time[0]) {
-    die("Failed to parse uploaded GPX - part 3");
+    retry("Failed to parse uploaded GPX - part 3");
 }
 
 // Save first point's start time, in case we can't find actual start control
@@ -195,7 +203,6 @@ $radio[0] = $radios;
 //echo $mopdiff->asXml();
 
 ?>
-<body>
 <p>Uploaded, please check out <a href="https://results.sageorienteering.ca/?cmp=<?php echo $cmp; ?>">https://results.sageorienteering.ca</a></p>
 </body>
 </html>
@@ -207,7 +214,6 @@ processXML($mopdiff, $cmpId);
 } else {
 include_once("data.php");
 ?>
-<body>
 <h1><?php echo $name;?> Results Upload</h1>
 <form action="results.php" method="post" enctype="multipart/form-data">
 <div class="input-group">
