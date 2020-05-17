@@ -1,5 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link href="/style.css" rel="stylesheet" type="text/css" />
 <?php
 include_once('data.php');
+
+echo "<title>" . $name . "</title>";
+?>
+<style>
+.input-group label { width: 200px; display: inline-block; }
+.input-group input { margin-bottom: 5px; display: inline-block; }
+</style>
+</head>
+
+<?php
 
 if (isset($_POST['submit'])) {
 
@@ -181,8 +195,6 @@ $radio[0] = $radios;
 //echo $mopdiff->asXml();
 
 ?>
-<!DOCTYPE html>
-<html>
 <body>
 <p>Uploaded, please check out <a href="https://results.sageorienteering.ca/?cmp=<?php echo $cmp; ?>">https://results.sageorienteering.ca</a></p>
 </body>
@@ -195,15 +207,6 @@ processXML($mopdiff, $cmpId);
 } else {
 include_once("data.php");
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-<link href="/style.css" rel="stylesheet" type="text/css" />
-<style>
-.input-group label { width: 200px; display: inline-block; }
-.input-group input { margin-bottom: 5px; display: inline-block; }
-</style>
-</head>
 <body>
 <h1><?php echo $name;?> Results Upload</h1>
 <form action="results.php" method="post" enctype="multipart/form-data">
