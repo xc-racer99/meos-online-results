@@ -199,14 +199,23 @@ include_once("data.php");
 <html>
 <head>
 <link href="/style.css" rel="stylesheet" type="text/css" />
+<style>
+.input-group label { width: 200px; display: inline-block; }
+.input-group input { margin-bottom: 5px; display: inline-block; }
+</style>
 </head>
 <body>
 <h1><?php echo $name;?> Results Upload</h1>
 <form action="results.php" method="post" enctype="multipart/form-data">
+<div class="input-group">
     <label for="name">Name: </label>
     <input type="text" name="name" id="name">
+</div>
+<div class="input-group">
     <label for="fileToUpload">Select GPX to upload: </label>
     <input type="file" name="fileToUpload" id="fileToUpload">
+</div>
+<div class="input-group">
     <label for="course">Choose course</label>
     <select id="course" name="course">
 <?php
@@ -215,7 +224,10 @@ foreach ($courses as $course) {
 }
 ?>
     </select>
+</div>
+<div class="input-group">
     <input type="submit" value="Upload GPX" name="submit">
+</div>
 </form>
 
 </body>
