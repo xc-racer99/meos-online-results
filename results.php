@@ -227,6 +227,7 @@ include_once("data.php");
 <div class="input-group">
     <label for="course">Choose course</label>
     <select id="course" name="course">
+        <option disabled selected value> -- select a course -- </option>
 <?php
 foreach ($courses as $course) {
 	echo '<option value="' . $course[1] . '">' . $course[0] . "</option>";
