@@ -203,7 +203,7 @@ $radio[0] = $radios;
 //echo $mopdiff->asXml();
 
 ?>
-<p>Uploaded, please check out <a href="https://results.sageorienteering.ca/?cmp=<?php echo $cmp; ?>">https://results.sageorienteering.ca</a></p>
+<p>Uploaded, please check out <a href="https://results.sageorienteering.ca/?cmp=<?php echo $cmpId; ?>">https://results.sageorienteering.ca</a></p>
 </body>
 </html>
 
