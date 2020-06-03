@@ -217,8 +217,8 @@ include_once("data.php");
 <h1><?php echo $name;?> Results Upload</h1>
 <form action="results.php" method="post" enctype="multipart/form-data">
 <div class="input-group">
-    <label for="name">Name: </label>
-    <input type="text" name="name" id="name">
+    <label for="name">Participant Name: </label>
+    <input type="text" name="name" id="name" maxlength="24">
 </div>
 <div class="input-group">
     <label for="fileToUpload">Select GPX to upload: </label>
