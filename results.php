@@ -64,7 +64,9 @@ if (!$trkseg) {
 }
 
 foreach ($trkseg->trkpt as $pt) {
-	$controls[] = array($pt->name, $pt['lat'], $pt['lon']);
+	if ($pt->name) {
+		$controls[] = array($pt->name, $pt['lat'], $pt['lon']);
+	}
 }
 
 //print_r($controls);

@@ -31,7 +31,7 @@ foreach ($courses as $course) {
 	}
 
 	foreach ($trkseg->trkpt as $pt) {
-		if (strstr($pt->name[0], "STA") || strstr($pt->name[0], "FIN") || empty($pt->name[0])) {
+		if (!isset($pt->name) || strstr($pt->name[0], "STA") || strstr($pt->name[0], "FIN") || empty($pt->name[0])) {
 			continue;
 		}
 
