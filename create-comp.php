@@ -18,6 +18,7 @@ $comp[0] = $name;
 foreach ($courses as $course) {
 	$cls = $xml->addChild('cls');
 	$cls->addAttribute('id', $course[1]);
+	$cls->addAttribute('ord', $course[1]);
 	$cls[0] = $course[0];
 
 	$courseXml = simplexml_load_file($course[2]) or die('Failed to load course');
