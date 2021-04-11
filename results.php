@@ -65,7 +65,15 @@ if (!$trkseg) {
 
 foreach ($trkseg->trkpt as $pt) {
 	if ($pt->name) {
-		$controls[] = array($pt->name, $pt['lat'], $pt['lon']);
+		// Find if this is a subsequent one or not
+		$num = 0;
+		foreach ($controls as $control) {
+			if ($control[0] == $num * 1000 + $pt->name) {
+				$num++;
+			}
+		}
+
+		$controls[] = array($pt->name + $num * 1000, $pt['lat'], $pt['lon']);
 	}
 }
 

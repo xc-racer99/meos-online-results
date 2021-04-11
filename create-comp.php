@@ -36,9 +36,17 @@ foreach ($courses as $course) {
 			continue;
 		}
 
-		$radios .= $pt->name[0] . ",";
+		$num = 0;
+		$prevRadios = explode(",", $radios);
+		foreach ($prevRadios as $radio) {
+			if ((int)$radio == (int)$pt->name[0]) {
+				$num++;
+			}
+		}
+
+		$radios .= $pt->name[0] + $num * 1000 . ",";
 		$ctrl = $xml->addChild('ctrl');
-		$ctrl->addAttribute('id', $pt->name[0]);
+		$ctrl->addAttribute('id', $pt->name[0] + $num * 1000);
 		$ctrl[0] = $pt->name[0];
 	}
 
@@ -52,6 +60,8 @@ foreach ($courses as $course) {
 		mkdir('uploads/' . $course[1], 0775, true);
 	}
 }
+
+//print_r($xml->asXml());
 
 include_once('../update-common.php');
 
