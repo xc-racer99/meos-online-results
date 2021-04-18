@@ -2,6 +2,28 @@
 <html>
 <head>
 <link href="/style.css" rel="stylesheet" type="text/css" />
+<html>
+<head>
+<meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+        <title>Live Results</title>
+        <link href="style.css" rel="stylesheet" type="text/css" />
+        <!-- favicon -->
+        <link rel="shortcut icon" href="images/favicon.png">
+
+        <!-- Auto-refresh -->
+        <!-- <meta http-equiv="refresh" content="120">-->
+        </head>
+
+        <body>
+        <header>
+        <img src="../images/SageLogo.png" alt="Sage Orienteering Club Live Results"/>
+<div class="topnav">
+<ul>
+  <li><a href="https://results.sageorienteering.ca/">All Results</a></li>
+  <li><a href="https://sage.whyjustrun.ca/">Sage Home</a></li>
+  <li><a href="https://sage.whyjustrun.ca/pages/211">Help</a></li>
+</ul>
+</div>
 <?php
 
 function retry($error) {
@@ -73,7 +95,11 @@ foreach ($trkseg->trkpt as $pt) {
 			}
 		}
 
-		$controls[] = array($pt->name + $num * 1000, $pt['lat'], $pt['lon']);
+		if (is_numeric($pt->name)) {
+			$controls[] = array($pt->name + $num * 1000, $pt['lat'], $pt['lon']);
+		} else {
+			$controls[] = array($pt->name, $pt['lat'], $pt['lon']);
+		}
 	}
 }
 
