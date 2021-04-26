@@ -128,7 +128,12 @@ if (!move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
     retry("Sorry, there was an error uploading your file.");
 }
 
-$gpx = simplexml_load_file($target_file) or retry("Failed to load uploaded GPX");
+
+$file = file_get_contents($target_file) or retry("Failed to load uploaded GPX");
+
+preg_replace("/\<\/trkseg\>\s+\<trkseg\>/", "", $file);
+
+$gpx = simplexml_load_string($file) or retry("Failed to load uploaded GPX as XML");
 
 //var_dump($gpx);
 
