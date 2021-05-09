@@ -95,7 +95,7 @@ foreach ($trkseg->trkpt as $pt) {
 			}
 		}
 
-		if (is_numeric($pt->name)) {
+		if (strncmp($pt->name, "FIN", 3) != 0) {
 			$controls[] = array($pt->name + $num * 1000, $pt['lat'], $pt['lon']);
 		} else {
 			$controls[] = array($pt->name, $pt['lat'], $pt['lon']);
