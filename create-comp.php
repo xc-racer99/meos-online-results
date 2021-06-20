@@ -23,31 +23,16 @@ foreach ($courses as $course) {
 
 	$courseXml = simplexml_load_file($course[2]) or die('Failed to load course');
 
-	//print_r($courseXml);
+//	print_r($courseXml);
 	$radios = "";
 
-	$trkseg = $courseXml->trk[0]->trkseg[0];
-	if (!$trkseg) {
-		die('Failed to parse course - contact website@skilarchhills.ca');
-	}
-
-	foreach ($trkseg->trkpt as $pt) {
-		if (!isset($pt->name) || strstr($pt->name[0], "STA") || strstr($pt->name[0], "FIN") || empty($pt->name[0])) {
-			continue;
+	foreach ($courseXml->RaceCourseData[0]->Course[0]->CourseControl as $pt) {
+		if ($pt && $pt['type'] == 'Control') {
+			$radios .= $pt->Control[0] . ",";
+			$ctrl = $xml->addChild('ctrl');
+			$ctrl->addAttribute('id', $pt->Control[0]);
+			$ctrl[0] = $pt->Control[0];
 		}
-
-		$num = 0;
-		$prevRadios = explode(",", $radios);
-		foreach ($prevRadios as $radio) {
-			if ((int)$radio == (int)$pt->name[0]) {
-				$num++;
-			}
-		}
-
-		$radios .= $pt->name[0] + $num * 1000 . ",";
-		$ctrl = $xml->addChild('ctrl');
-		$ctrl->addAttribute('id', $pt->name[0] + $num * 1000);
-		$ctrl[0] = $pt->name[0];
 	}
 
 	// remove tailing comma

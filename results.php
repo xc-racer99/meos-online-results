@@ -80,26 +80,42 @@ $courseXml = simplexml_load_file($selCourse[2]) or retry('Failed to load course'
 
 //print_r($courseXml);
 
-$trkseg = $courseXml->trk[0]->trkseg[0];
-if (!$trkseg) {
-	retry('Failed to parse course - contact website@skilarchhills.ca');
+$course = $courseXml->RaceCourseData[0]->Course[0];
+if (!$course) {
+	retry('Failed to parse course - contact contact@sageorienteering.ca');
 }
 
-foreach ($trkseg->trkpt as $pt) {
-	if ($pt->name) {
-		// Find if this is a subsequent one or not
-		$num = 0;
-		foreach ($controls as $control) {
-			if ($control[0] == $num * 1000 + $pt->name) {
-				$num++;
+foreach ($course->CourseControl as $pt) {
+	if ($pt) {
+		// Find the control, then find lat/long
+		$found = false;
+		$ctrl = array();
+
+		foreach ($courseXml->RaceCourseData[0]->Control as $control) {
+			if (strcmp($control->Id[0], $pt->Control[0]) == 0) {
+				$ctrl[0] = $pt->Control[0];
+				$ctrl[1] = $control->Position[0]['lat'];
+				$ctrl[2] = $control->Position[0]['lng'];
+				$ctrl[3] = false;
+				$found = true;
+				break;
 			}
 		}
 
-		if (strncmp($pt->name, "FIN", 3) != 0) {
-			$controls[] = array($pt->name + $num * 1000, $pt['lat'], $pt['lon']);
-		} else {
-			$controls[] = array($pt->name, $pt['lat'], $pt['lon']);
+		if (!$found) {
+			retry('Invalid course file - contact contact@sageorienteering.ca');
 		}
+
+		if (strcmp($pt['type'], "Control") == 0) {
+			// Find this start control and get the lat/long
+			$ctrl[4] = $pt->Score;
+		} else if (strcmp($pt['type'], "Start") == 0) {
+			$ctrl[0] = "Start";
+		} else if (strcmp($pt['type'], "Finish") == 0) {
+			$ctrl[0] = "Finish";
+		}
+
+		$controls[] = $ctrl;
 	}
 }
 
@@ -150,18 +166,21 @@ if (!$trkseg->trkpt[0]->time[0]) {
 
 // Save first point's start time, in case we can't find actual start control
 $startTime = $trkseg->trkpt[0]->time[0];
+$finishTime = 0;
 
 $lastIndex = 0;
 $found = array();
-$ok = 1;
 $i = 0;
+$pts = 0;
 
-foreach ($controls as $control) {
-	$i = $lastIndex;
-	$pt = $trkseg->trkpt[$i];
-	while ($pt = $trkseg->trkpt[$i++]) {
+while ($pt = $trkseg->trkpt[$i++]) {
+	// $control is name, lat, lon, found, pts
+	foreach ($controls as &$control) {
+		// Ensure we haven't found already
+		if ($control[3]) {
+			continue;
+		}
 
-		// $control is name, lat, lon
 		$latdiff = (float)$control[1] - (float)$pt['lat'];
 		$londiff = (float)$control[2] - (float)$pt['lon'];
 
@@ -170,19 +189,26 @@ foreach ($controls as $control) {
 		}
 
 		$found[] = array($control[0], $pt->time[0]);
-		$lastIndex = $i;
 
 		// Check if start
-		if ($control === $controls[0]) {
-			$startTime = $pt->time[0];
+		if (strcmp($control[0], "Start") == 0) {
+			if ($i < count($trkseg->trkpt) / 2) {
+				$startTime = $pt->time[0];
+				$control[3] = true;
+			}
+		} else if (strcmp($control[0], "Finish") == 0) {
+			$finishTime = $pt->time[0];
+		} else {
+			// Mark that we've found this control
+			$control[3] = true;
+			$pts += $control[4];
 		}
-
-		break;
 	}
+}
 
-	if (!$pt) {
-		$ok = 0;
-	}
+// Set finish time as the end time
+if ($finishTime === 0) {
+	$finishTime = $trkseg->trkpt[count($trkseg->trkpt) - 1];
 }
 
 // Create MOPDdiff
@@ -196,38 +222,38 @@ $base = $cmp->addChild('base');
 $base[0] = $name;
 $base->addAttribute('org', '1');
 $base->addAttribute('cls', $selCourse[1]);
-
-if ($ok) {
-	$base->addAttribute('stat', '1');
-} else {
-	$base->addAttribute('stat', '3');
-}
+$base->addAttribute('stat', '1');
 
 // Create datetime for start
 $startDT = date_create($startTime);
 $st = ($startDT->format("H") * 3600 + $startDT->format("i") * 60 + $startDT->format("s")) * 10;
 $base->addAttribute('st', $st);
 
-// End
-$end = end($found);
-if (strstr($end[0], "FIN")) {
-	$time = date_create($end[1]);
-	$diff = date_diff($time, $startDT);
+// Create datetime for finish
+$finishDT = date_create($finishTime);
+$totalDT = date_diff($finishDT, $startDT);
+$rt = ($totalDT->h * 3600 + $totalDT->i * 60 + $totalDT->s) * 10;
+$base->addAttribute('rt', $rt);
 
-	$rt = ($diff->h * 3600 + $diff->i * 60 + $diff->s) * 10;
+//echo $finishTime . "<br />";
+//echo $startTime . "<br />";
+//var_dump($totalDT);
 
-	$base->addAttribute('rt', $rt);
+// Calculate deductions
+$secondsOver = ($rt / 10) - $selCourse[3];
+if ($secondsOver > 0) {
+	$deductionCount = $point_deduction_per_minute * ((int)($secondsOver / 60) + 1);
 } else {
-	$base->addAttribute('rt', '0');
+	$deductionCount = 0;
 }
-reset($found);
+$pts -= $deductionCount;
 
 $radio = $cmp->addChild('radio');
 $radios = "";
 
 foreach ($found as $entry) {
 	// $entry is control, time
-	if (strstr($entry[0], "STA") || strstr($entry[0], "FIN") || empty($entry[0])) {
+	if ($entry[0] == "Start" || $entry[0] == "Finish" || empty($entry[0])) {
 		continue;
 	}
 
@@ -242,6 +268,9 @@ $radios = substr($radios, 0, -1);
 $radio[0] = $radios;
 
 //echo $mopdiff->asXml();
+
+// Update text file
+file_put_contents($target_dir . "results.txt", $name . "," . $totalDT->h . ":" . $totalDT->i . ":" . $totalDT->s . "," . $pts . ",-" . $deductionCount . "\n", FILE_APPEND);
 
 ?>
 <p>Uploaded, please check out <a href="https://results.sageorienteering.ca/?cmp=<?php echo $cmpId; ?>">https://results.sageorienteering.ca</a></p>
