@@ -47,7 +47,7 @@ echo "<title>" . $name . "</title>";
 
 if (isset($_POST['submit'])) {
 
-if (empty($_FILES['fileToUpload']['name'])) {
+if (empty($_FILES['fileToUpload']['name']) && empty($_POST['no_gps'])) {
 	retry('No GPX provided');
 }
 
@@ -72,6 +72,30 @@ foreach ($courses as $course) {
 if ($selCourse === 0) {
 	retry('Invalid course selected');
 }
+
+if (!empty($_POST['no_gps'])) {
+	$mopdiff = new SimpleXMLElement('<MOPDiff xmlns="http://www.melin.nu/mop"></MOPDiff>');
+	$cmp = $mopdiff->addChild('cmp');
+	$dt = date_create();
+	//$str = $dt->format("y") . $dt->format("m") . $dt->format("d") . $dt->format("H") . $dt->format("i") . $dt->format("s");
+	$str = $dt->format("H") . $dt->format("i") . $dt->format("s");
+	$cmp->addAttribute('id', $str);
+	$base = $cmp->addChild('base');
+	$base[0] = $name;
+	$base->addAttribute('org', '1');
+	$base->addAttribute('cls', $selCourse[1]);
+	$base->addAttribute('stat', '2');
+?>
+<p>Participation saved, please check out <a href="https://results.sageorienteering.ca/?cmp=<?php echo $cmpId; ?>">https://results.sageorienteering.ca</a> for all participants</p>
+<p>To record another, click <a href=".">here.</a></p>
+</body>
+</html>
+
+<?php
+include_once('../update-common.php');
+processXML($mopdiff, $cmpId);
+}
+
 
 $controls = array();
 $name = $_POST['name'];
@@ -260,6 +284,10 @@ include_once("data.php");
 <div class="input-group">
     <label for="name">Participant Name: </label>
     <input type="text" name="name" id="name" maxlength="24">
+</div>
+<div class="input-group">
+    <label for="no_gps">No GPS Upload</label>
+    <input type="checkbox" name="no_gps" id="no_gps">
 </div>
 <div class="input-group">
     <label for="fileToUpload">Select GPX to upload: </label>
