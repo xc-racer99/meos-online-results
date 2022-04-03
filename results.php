@@ -81,7 +81,7 @@ if (!empty($_POST['no_gps'])) {
 	$str = $dt->format("H") . $dt->format("i") . $dt->format("s");
 	$cmp->addAttribute('id', $str);
 	$base = $cmp->addChild('base');
-	$base[0] = $name;
+	$base[0] = $_POST['name'];
 	$base->addAttribute('org', '1');
 	$base->addAttribute('cls', $selCourse[1]);
 	$base->addAttribute('stat', '2');
